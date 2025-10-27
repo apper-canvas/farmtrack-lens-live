@@ -2,11 +2,14 @@ import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import ApperIcon from "@/components/ApperIcon";
+import Button from "@/components/atoms/Button";
 import { cn } from "@/utils/cn";
+import { useAuth } from "@/layouts/Root";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { logout } = useAuth();
 
   const navItems = [
     { path: "", label: "Dashboard", icon: "LayoutDashboard" },
@@ -57,6 +60,15 @@ const Header = () => {
                 {item.label}
               </Link>
             ))}
+            <Button
+              variant="outline"
+              size="small"
+              onClick={logout}
+              className="ml-4"
+            >
+              <ApperIcon name="LogOut" size={16} className="mr-2" />
+              Logout
+            </Button>
           </nav>
 
           {/* Mobile Menu Button */}
@@ -93,6 +105,18 @@ const Header = () => {
                   {item.label}
                 </Link>
               ))}
+              <Button
+                variant="outline"
+                size="small"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  logout();
+                }}
+                className="w-full"
+              >
+                <ApperIcon name="LogOut" size={16} className="mr-2" />
+                Logout
+              </Button>
             </nav>
           </motion.div>
         )}

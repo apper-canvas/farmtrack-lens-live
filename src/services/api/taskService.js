@@ -1,60 +1,223 @@
-import tasksData from "@/services/mockData/tasks.json";
-
-let tasks = [...tasksData];
+import { getApperClient } from "@/services/apperClient";
 
 const taskService = {
   getAll: async () => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return [...tasks];
+    try {
+      const apperClient = getApperClient();
+      if (!apperClient) {
+        throw new Error("ApperClient not initialized");
+      }
+
+      const response = await apperClient.fetchRecords("task_c", {
+        fields: [
+          { field: { Name: "Name" } },
+          { field: { Name: "title_c" } },
+          { field: { Name: "description_c" } },
+          { field: { Name: "due_date_c" } },
+          { field: { Name: "priority_c" } },
+          { field: { Name: "completed_c" } },
+          { field: { Name: "completed_at_c" } },
+          { field: { Name: "farm_id_c" }, referenceField: { field: { Name: "Name" } } },
+          { field: { Name: "crop_id_c" }, referenceField: { field: { Name: "Name" } } }
+        ]
+      });
+
+      if (!response.success) {
+        console.error(response.message);
+        return [];
+      }
+
+      return response.data || [];
+    } catch (error) {
+      console.error("Error fetching tasks:", error?.message || error);
+      return [];
+    }
   },
 
   getById: async (id) => {
-    await new Promise(resolve => setTimeout(resolve, 200));
-    const task = tasks.find(t => t.Id === parseInt(id));
-    return task ? { ...task } : null;
+    try {
+      const apperClient = getApperClient();
+      if (!apperClient) {
+        throw new Error("ApperClient not initialized");
+      }
+
+      const response = await apperClient.getRecordById("task_c", parseInt(id), {
+        fields: [
+          { field: { Name: "Name" } },
+          { field: { Name: "title_c" } },
+          { field: { Name: "description_c" } },
+          { field: { Name: "due_date_c" } },
+          { field: { Name: "priority_c" } },
+          { field: { Name: "completed_c" } },
+          { field: { Name: "completed_at_c" } },
+          { field: { Name: "farm_id_c" }, referenceField: { field: { Name: "Name" } } },
+          { field: { Name: "crop_id_c" }, referenceField: { field: { Name: "Name" } } }
+        ]
+      });
+
+      if (!response.success) {
+        console.error(response.message);
+        return null;
+      }
+
+      return response.data || null;
+    } catch (error) {
+      console.error(`Error fetching task ${id}:`, error?.message || error);
+      return null;
+    }
   },
 
   create: async (taskData) => {
-    await new Promise(resolve => setTimeout(resolve, 400));
-    const newTask = {
-      ...taskData,
-      Id: Math.max(...tasks.map(t => t.Id), 0) + 1,
-      completed: false,
-      completedAt: null
-    };
-    tasks.push(newTask);
-    return { ...newTask };
+    try {
+      const apperClient = getApperClient();
+      if (!apperClient) {
+        throw new Error("ApperClient not initialized");
+      }
+
+      const payload = {
+        records: [{
+          Name: taskData.title || "",
+          title_c: taskData.title || "",
+          description_c: taskData.description || "",
+          due_date_c: taskData.dueDate || "",
+          priority_c: taskData.priority || "medium",
+          completed_c: false,
+          farm_id_c: taskData.farmId ? parseInt(taskData.farmId) : null,
+          crop_id_c: taskData.cropId ? parseInt(taskData.cropId) : null
+        }]
+      };
+
+      const response = await apperClient.createRecord("task_c", payload);
+
+      if (!response.success) {
+        console.error(response.message);
+        return null;
+      }
+
+      if (response.results && response.results.length > 0) {
+        const result = response.results[0];
+        if (result.success) {
+          return result.data;
+        }
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Error creating task:", error?.message || error);
+      return null;
+    }
   },
 
   update: async (id, taskData) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const index = tasks.findIndex(t => t.Id === parseInt(id));
-    if (index !== -1) {
-      tasks[index] = { ...tasks[index], ...taskData };
-      return { ...tasks[index] };
+    try {
+      const apperClient = getApperClient();
+      if (!apperClient) {
+        throw new Error("ApperClient not initialized");
+      }
+
+      const payload = {
+        records: [{
+          Id: parseInt(id),
+          Name: taskData.title || "",
+          title_c: taskData.title || "",
+          description_c: taskData.description || "",
+          due_date_c: taskData.dueDate || "",
+          priority_c: taskData.priority || "medium",
+          farm_id_c: taskData.farmId ? parseInt(taskData.farmId) : null,
+          crop_id_c: taskData.cropId ? parseInt(taskData.cropId) : null
+        }]
+      };
+
+      const response = await apperClient.updateRecord("task_c", payload);
+
+      if (!response.success) {
+        console.error(response.message);
+        return null;
+      }
+
+      if (response.results && response.results.length > 0) {
+        const result = response.results[0];
+        if (result.success) {
+          return result.data;
+        }
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Error updating task:", error?.message || error);
+      return null;
     }
-    return null;
   },
 
   toggleComplete: async (id) => {
-    await new Promise(resolve => setTimeout(resolve, 250));
-    const index = tasks.findIndex(t => t.Id === parseInt(id));
-    if (index !== -1) {
-      tasks[index].completed = !tasks[index].completed;
-      tasks[index].completedAt = tasks[index].completed ? new Date().toISOString() : null;
-      return { ...tasks[index] };
+    try {
+      const apperClient = getApperClient();
+      if (!apperClient) {
+        throw new Error("ApperClient not initialized");
+      }
+
+      // First get current task state
+      const currentTask = await taskService.getById(id);
+      if (!currentTask) {
+        return null;
+      }
+
+      const newCompletedState = !currentTask.completed_c;
+
+      const payload = {
+        records: [{
+          Id: parseInt(id),
+          completed_c: newCompletedState,
+          completed_at_c: newCompletedState ? new Date().toISOString() : null
+        }]
+      };
+
+      const response = await apperClient.updateRecord("task_c", payload);
+
+      if (!response.success) {
+        console.error(response.message);
+        return null;
+      }
+
+      if (response.results && response.results.length > 0) {
+        const result = response.results[0];
+        if (result.success) {
+          return result.data;
+        }
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Error toggling task completion:", error?.message || error);
+      return null;
     }
-    return null;
   },
 
   delete: async (id) => {
-    await new Promise(resolve => setTimeout(resolve, 200));
-    const index = tasks.findIndex(t => t.Id === parseInt(id));
-    if (index !== -1) {
-      tasks.splice(index, 1);
-      return true;
+    try {
+      const apperClient = getApperClient();
+      if (!apperClient) {
+        throw new Error("ApperClient not initialized");
+      }
+
+      const response = await apperClient.deleteRecord("task_c", {
+        RecordIds: [parseInt(id)]
+      });
+
+      if (!response.success) {
+        console.error(response.message);
+        return false;
+      }
+
+      if (response.results && response.results.length > 0) {
+        return response.results[0].success;
+      }
+
+      return false;
+    } catch (error) {
+      console.error("Error deleting task:", error?.message || error);
+      return false;
     }
-    return false;
   }
 };
 
