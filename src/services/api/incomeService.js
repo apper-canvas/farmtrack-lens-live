@@ -76,7 +76,7 @@ const incomeService = {
 
       const payload = {
         records: [{
-          Name: `Income - ${incomeData.buyer}` || "",
+Name: `Income - ${incomeData.buyer}`,
           date_c: incomeData.date || "",
           crop_id_c: incomeData.cropId ? parseInt(incomeData.cropId) : null,
           quantity_c: quantity,
@@ -121,7 +121,7 @@ const incomeService = {
       const payload = {
         records: [{
           Id: parseInt(id),
-          Name: `Income - ${incomeData.buyer}` || "",
+Name: `Income - ${incomeData.buyer}`,
           date_c: incomeData.date || "",
           crop_id_c: incomeData.cropId ? parseInt(incomeData.cropId) : null,
           quantity_c: quantity,

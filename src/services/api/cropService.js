@@ -114,7 +114,7 @@ const cropService = {
 
       const payload = {
         records: [{
-          Name: `${cropData.cropName} - ${cropData.variety}` || "",
+Name: `${cropData.cropName} - ${cropData.variety}`,
           crop_name_c: cropData.cropName || "",
           variety_c: cropData.variety || "",
           planting_date_c: cropData.plantingDate || "",
@@ -157,7 +157,7 @@ const cropService = {
       const payload = {
         records: [{
           Id: parseInt(id),
-          Name: `${cropData.cropName} - ${cropData.variety}` || "",
+Name: `${cropData.cropName} - ${cropData.variety}`,
           crop_name_c: cropData.cropName || "",
           variety_c: cropData.variety || "",
           planting_date_c: cropData.plantingDate || "",

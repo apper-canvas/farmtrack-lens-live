@@ -70,7 +70,7 @@ const expenseService = {
 
       const payload = {
         records: [{
-          Name: `${expenseData.category} - ${expenseData.description}` || "",
+Name: `${expenseData.category} - ${expenseData.description}`,
           date_c: expenseData.date || "",
           category_c: expenseData.category || "",
           amount_c: parseFloat(expenseData.amount) || 0,
@@ -110,7 +110,7 @@ const expenseService = {
       const payload = {
         records: [{
           Id: parseInt(id),
-          Name: `${expenseData.category} - ${expenseData.description}` || "",
+Name: `${expenseData.category} - ${expenseData.description}`,
           date_c: expenseData.date || "",
           category_c: expenseData.category || "",
           amount_c: parseFloat(expenseData.amount) || 0,
